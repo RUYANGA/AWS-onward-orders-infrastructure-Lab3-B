@@ -1,0 +1,25 @@
+# Runs on every pull request: Git sync deploys whatever lands on main, so broken
+# or non-compliant templates and failing app tests must never get there.
+name: validate
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"   # same as the servers
+      - run: pip install "cfn-lint>=1,<2" -r app/requirements-dev.txt
+      - name: Lint CloudFormation
+        run: cfn-lint --regions eu-west-1 --ignore-checks W2001 -- templates/*.yaml bootstrap/*.yaml
+      - name: Company standards (no inline policies, users, keys or SSH)
+        run: bash scripts/check_standards.sh
+      - name: App tests
+        working-directory: app
+        run: python -m pytest -q
