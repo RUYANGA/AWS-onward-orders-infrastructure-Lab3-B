@@ -1,0 +1,176 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Onward Logistics, one-time bootstrap that turns on CloudFormation Git sync
+  for the sales-day order stack (onward-<env>-orders). It creates the GitHub
+  connection, the Git sync role and the sync configuration. Git sync cannot
+  create the thing that enables Git sync, so only this stack is deployed with
+  the CLI (scripts/bootstrap.sh); the order system itself is deployed from Git.
+
+Parameters:
+  Environment:
+    Type: String
+    AllowedValues: [dev, test, prod]
+  Owner:
+    Type: String
+  GitHubOwner:
+    Type: String
+  RepoName:
+    Type: String
+    Default: AWS-Onward-Order-EC2-Lab3-B
+  Branch:
+    Type: String
+    Default: main
+  ConnectionReady:
+    Type: String
+    AllowedValues: ["true", "false"]
+    Default: "false"
+    Description: Set to true after authorising the GitHub connection in the console.
+
+Conditions:
+  IsConnectionReady: !Equals [!Ref ConnectionReady, "true"]
+
+Resources:
+  GitHubConnection:
+    Type: AWS::CodeStarConnections::Connection
+    Properties:
+      ConnectionName: !Sub "onward-${Environment}-github"
+      ProviderType: GitHub
+
+  RepositoryLink:
+    Type: AWS::CodeStarConnections::RepositoryLink
+    Condition: IsConnectionReady
+    Properties:
+      ConnectionArn: !Ref GitHubConnection
+      OwnerId: !Ref GitHubOwner
+      RepositoryName: !Ref RepoName
+
+  GitSyncPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "onward-${Environment}-gitsync"
+      Description: Lets CloudFormation Git sync create and run change sets.
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: SyncToCloudFormation
+            Effect: Allow
+            Action:
+              - cloudformation:CreateChangeSet
+              - cloudformation:DeleteChangeSet
+              - cloudformation:DescribeChangeSet
+              - cloudformation:DescribeStackEvents
+              - cloudformation:DescribeStacks
+              - cloudformation:ExecuteChangeSet
+              - cloudformation:GetTemplate
+              - cloudformation:ListChangeSets
+              - cloudformation:ListStacks
+              - cloudformation:ValidateTemplate
+            Resource: "*"
+          - Sid: PolicyForManagedRules
+            Effect: Allow
+            Action: [events:PutRule, events:PutTargets]
+            Resource: "*"
+            Condition:
+              StringEquals:
+                "events:ManagedBy": [cloudformation.sync.codeconnections.amazonaws.com]
+          - Sid: PolicyForDescribingRule
+            Effect: Allow
+            Action: events:DescribeRule
+            Resource: "*"
+
+  StackResourcesPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub "onward-${Environment}-orders-stack-resources"
+      Description: Permissions to build the sales-day order stack. Cannot create inline policies, users or access keys.
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ServicesUsedByTheStack
+            Effect: Allow
+            Action:
+              - ec2:*
+              - elasticloadbalancing:*
+              - autoscaling:*
+              - cloudwatch:*
+            Resource: "*"
+          - Sid: ResolveLatestAmazonLinuxImage
+            Effect: Allow
+            Action: [ssm:GetParameters, ssm:GetParameter]
+            Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}::parameter/aws/service/*"
+          - Sid: CpuSpikeDocumentOnly
+            Effect: Allow
+            Action: [ssm:CreateDocument, ssm:UpdateDocument, ssm:DeleteDocument, ssm:DescribeDocument, ssm:GetDocument, ssm:UpdateDocumentDefaultVersion, ssm:AddTagsToResource, ssm:RemoveTagsFromResource, ssm:ListTagsForResource]
+            Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:document/onward-*"
+          - Sid: OnwardRolesProfilesOnly
+            Effect: Allow
+            Action:
+              - iam:CreateRole
+              - iam:DeleteRole
+              - iam:GetRole
+              - iam:UpdateRole
+              - iam:UpdateRoleDescription
+              - iam:UpdateAssumeRolePolicy
+              - iam:TagRole
+              - iam:UntagRole
+              - iam:AttachRolePolicy
+              - iam:DetachRolePolicy
+              - iam:ListAttachedRolePolicies
+              - iam:ListRolePolicies
+              - iam:PassRole
+              - iam:CreateInstanceProfile
+              - iam:DeleteInstanceProfile
+              - iam:GetInstanceProfile
+              - iam:AddRoleToInstanceProfile
+              - iam:RemoveRoleFromInstanceProfile
+              - iam:TagInstanceProfile
+              - iam:ListInstanceProfilesForRole
+            Resource:
+              - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/onward-*"
+              - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/onward-*"
+          - Sid: ServiceLinkedRoles
+            Effect: Allow
+            Action: iam:CreateServiceLinkedRole
+            Resource: "*"
+            Condition:
+              StringEquals:
+                "iam:AWSServiceName": [autoscaling.amazonaws.com, elasticloadbalancing.amazonaws.com]
+          - Sid: EnforceCompanyAccessStandard
+            Effect: Deny
+            Action: [iam:PutRolePolicy, iam:PutUserPolicy, iam:PutGroupPolicy, iam:CreateUser, iam:CreateAccessKey]
+            Resource: "*"
+
+  GitSyncRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub "onward-${Environment}-gitsync"
+      Description: Assumed by CloudFormation Git sync to deploy the order stack from GitHub.
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: cloudformation.sync.codeconnections.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals: { "aws:SourceAccount": !Ref AWS::AccountId }
+      ManagedPolicyArns: [!Ref GitSyncPolicy, !Ref StackResourcesPolicy]
+
+  OrdersSync:
+    Type: AWS::CodeStarConnections::SyncConfiguration
+    Condition: IsConnectionReady
+    Properties:
+      ResourceName: !Sub "onward-${Environment}-orders"
+      ConfigFile: !Sub "deployments/${Environment}/orders.yaml"
+      Branch: !Ref Branch
+      RepositoryLinkId: !GetAtt RepositoryLink.RepositoryLinkId
+      RoleArn: !GetAtt GitSyncRole.Arn
+      SyncType: CFN_STACK_SYNC
+      PublishDeploymentStatus: ENABLED
+      TriggerResourceUpdateOn: FILE_CHANGE   # app-only commits do not touch the stack
+
+Outputs:
+  ConnectionArn:
+    Description: Authorise once in the console (Developer Tools > Settings > Connections).
+    Value: !Ref GitHubConnection
+  GitSyncRoleArn:
+    Value: !GetAtt GitSyncRole.Arn
