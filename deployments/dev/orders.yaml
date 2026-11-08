@@ -1,0 +1,16 @@
+# Git sync deployment file for stack onward-dev-orders.
+# To roll out a new app version: set AppVersion to a tag or commit SHA and commit.
+template-file-path: templates/orders.yaml
+parameters:
+  Environment: dev
+  Owner: Merci RUYANGA
+  AppRepoUrl: https://github.com/RUYANGA/AWS-Onward-Order-EC2-Lab3-B.git
+  AppVersion: main
+  InstanceType: t3.micro
+  MinSize: "2"
+  MaxSize: "6"
+  CpuTargetPercent: "50"
+tags:
+  Project: onward
+  Owner: Merci RUYANGA
+  Environment: dev
