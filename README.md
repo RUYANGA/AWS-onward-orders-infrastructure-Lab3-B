@@ -29,7 +29,6 @@ scripts/bootstrap.sh         build or rebuild from scratch
 scripts/teardown.sh          delete after a demo (cost control)
 scripts/check_standards.sh   no inline policies, IAM users, keys, SSH or port 22 (also in CI)
 scripts/demo/                one script per client check
-config.env                   region, environment, owner and GitHub names for the scripts
 ```
 
 ## How a server gets the application
@@ -71,8 +70,10 @@ replaces servers one at a time, keeping at least one in service.
 ## Build or rebuild from scratch
 
 Prerequisites: AWS CLI v2 signed in through SSO or a role; this repository pushed to GitHub
-as a **public** repository (servers clone it without credentials); your name and GitHub
-username set in `config.env` and `deployments/dev/orders.yaml`.
+as a **public** repository (servers clone it without credentials). The region (`eu-west-1`),
+environment (`dev`), owner and GitHub repository are defaults in `scripts/lib.sh`, so there is
+nothing to configure; override one for a single run with e.g. `ENVIRONMENT=test`. If you
+change the owner, change it in `deployments/dev/orders.yaml` too.
 
 1. `./scripts/bootstrap.sh connection`, then authorise the GitHub connection once in the
    console. AWS requires a person to approve access to GitHub; it is the only console step.
