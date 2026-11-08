@@ -9,7 +9,10 @@ Description: >-
 Parameters:
   Environment:
     Type: String
-    AllowedValues: [dev, test, prod]
+    AllowedValues:
+      - dev
+      - test
+      - prod
   Owner:
     Type: String
   GitHubOwner:
@@ -22,12 +25,16 @@ Parameters:
     Default: main
   ConnectionReady:
     Type: String
-    AllowedValues: ["true", "false"]
+    AllowedValues:
+      - "true"
+      - "false"
     Default: "false"
     Description: Set to true after authorising the GitHub connection in the console.
 
 Conditions:
-  IsConnectionReady: !Equals [!Ref ConnectionReady, "true"]
+  IsConnectionReady: !Equals
+    - !Ref ConnectionReady
+    - "true"
 
 Resources:
   GitHubConnection:
@@ -68,11 +75,14 @@ Resources:
             Resource: "*"
           - Sid: PolicyForManagedRules
             Effect: Allow
-            Action: [events:PutRule, events:PutTargets]
+            Action:
+              - events:PutRule
+              - events:PutTargets
             Resource: "*"
             Condition:
               StringEquals:
-                "events:ManagedBy": [cloudformation.sync.codeconnections.amazonaws.com]
+                "events:ManagedBy":
+                  - cloudformation.sync.codeconnections.amazonaws.com
           - Sid: PolicyForDescribingRule
             Effect: Allow
             Action: events:DescribeRule
@@ -96,11 +106,22 @@ Resources:
             Resource: "*"
           - Sid: ResolveLatestAmazonLinuxImage
             Effect: Allow
-            Action: [ssm:GetParameters, ssm:GetParameter]
+            Action:
+              - ssm:GetParameters
+              - ssm:GetParameter
             Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}::parameter/aws/service/*"
           - Sid: CpuSpikeDocumentOnly
             Effect: Allow
-            Action: [ssm:CreateDocument, ssm:UpdateDocument, ssm:DeleteDocument, ssm:DescribeDocument, ssm:GetDocument, ssm:UpdateDocumentDefaultVersion, ssm:AddTagsToResource, ssm:RemoveTagsFromResource, ssm:ListTagsForResource]
+            Action:
+              - ssm:CreateDocument
+              - ssm:UpdateDocument
+              - ssm:DeleteDocument
+              - ssm:DescribeDocument
+              - ssm:GetDocument
+              - ssm:UpdateDocumentDefaultVersion
+              - ssm:AddTagsToResource
+              - ssm:RemoveTagsFromResource
+              - ssm:ListTagsForResource
             Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:document/onward-*"
           - Sid: OnwardRolesProfilesOnly
             Effect: Allow
@@ -134,10 +155,17 @@ Resources:
             Resource: "*"
             Condition:
               StringEquals:
-                "iam:AWSServiceName": [autoscaling.amazonaws.com, elasticloadbalancing.amazonaws.com]
+                "iam:AWSServiceName":
+                  - autoscaling.amazonaws.com
+                  - elasticloadbalancing.amazonaws.com
           - Sid: EnforceCompanyAccessStandard
             Effect: Deny
-            Action: [iam:PutRolePolicy, iam:PutUserPolicy, iam:PutGroupPolicy, iam:CreateUser, iam:CreateAccessKey]
+            Action:
+              - iam:PutRolePolicy
+              - iam:PutUserPolicy
+              - iam:PutGroupPolicy
+              - iam:CreateUser
+              - iam:CreateAccessKey
             Resource: "*"
 
   GitSyncRole:
@@ -149,11 +177,15 @@ Resources:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
-            Principal: { Service: cloudformation.sync.codeconnections.amazonaws.com }
+            Principal:
+              Service: cloudformation.sync.codeconnections.amazonaws.com
             Action: sts:AssumeRole
             Condition:
-              StringEquals: { "aws:SourceAccount": !Ref AWS::AccountId }
-      ManagedPolicyArns: [!Ref GitSyncPolicy, !Ref StackResourcesPolicy]
+              StringEquals:
+                "aws:SourceAccount": !Ref AWS::AccountId
+      ManagedPolicyArns:
+        - !Ref GitSyncPolicy
+        - !Ref StackResourcesPolicy
 
   OrdersSync:
     Type: AWS::CodeStarConnections::SyncConfiguration

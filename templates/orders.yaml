@@ -10,7 +10,10 @@ Description: >-
 Parameters:
   Environment:
     Type: String
-    AllowedValues: [dev, test, prod]
+    AllowedValues:
+      - dev
+      - test
+      - prod
   Owner:
     Type: String
     Description: Your full name. Shown on the page and used in tags.
@@ -29,7 +32,9 @@ Parameters:
   InstanceType:
     Type: String
     Default: t3.micro
-    AllowedValues: [t3.micro, t2.micro]
+    AllowedValues:
+      - t3.micro
+      - t2.micro
     Description: Free Tier eligible types only.
   LatestAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
@@ -63,13 +68,15 @@ Resources:
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-vpc" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-vpc"
 
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-igw" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-igw"
 
   InternetGatewayAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -82,49 +89,82 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Select [0, !GetAZs ""]
-      CidrBlock: !Select [0, !Cidr [!Ref VpcCidr, 4, 8]]
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ""
+      CidrBlock: !Select
+        - 0
+        - !Cidr
+            - !Ref VpcCidr
+            - 4
+            - 8
       MapPublicIpOnLaunch: false
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-public-a" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-public-a"
 
   PublicSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Select [1, !GetAZs ""]
-      CidrBlock: !Select [1, !Cidr [!Ref VpcCidr, 4, 8]]
+      AvailabilityZone: !Select
+        - 1
+        - !GetAZs ""
+      CidrBlock: !Select
+        - 1
+        - !Cidr
+            - !Ref VpcCidr
+            - 4
+            - 8
       MapPublicIpOnLaunch: false
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-public-b" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-public-b"
 
   # Private subnets hold the servers. No public IPs; outbound only via NAT.
   PrivateSubnetA:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Select [0, !GetAZs ""]
-      CidrBlock: !Select [2, !Cidr [!Ref VpcCidr, 4, 8]]
+      AvailabilityZone: !Select
+        - 0
+        - !GetAZs ""
+      CidrBlock: !Select
+        - 2
+        - !Cidr
+            - !Ref VpcCidr
+            - 4
+            - 8
       MapPublicIpOnLaunch: false
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-private-a" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-private-a"
 
   PrivateSubnetB:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Select [1, !GetAZs ""]
-      CidrBlock: !Select [3, !Cidr [!Ref VpcCidr, 4, 8]]
+      AvailabilityZone: !Select
+        - 1
+        - !GetAZs ""
+      CidrBlock: !Select
+        - 3
+        - !Cidr
+            - !Ref VpcCidr
+            - 4
+            - 8
       MapPublicIpOnLaunch: false
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-private-b" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-private-b"
 
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref Vpc
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-public" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-public"
 
   PublicDefaultRoute:
     Type: AWS::EC2::Route
@@ -136,11 +176,15 @@ Resources:
 
   PublicSubnetARoutes:
     Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties: { SubnetId: !Ref PublicSubnetA, RouteTableId: !Ref PublicRouteTable }
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicRouteTable
 
   PublicSubnetBRoutes:
     Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties: { SubnetId: !Ref PublicSubnetB, RouteTableId: !Ref PublicRouteTable }
+    Properties:
+      SubnetId: !Ref PublicSubnetB
+      RouteTableId: !Ref PublicRouteTable
 
   # One NAT gateway for the whole VPC. In regional mode AWS runs it in every
   # zone that has servers and expands or contracts it automatically, so a zone
@@ -154,7 +198,8 @@ Resources:
       ConnectivityType: public
       VpcId: !Ref Vpc
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-nat" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-nat"
 
   # Both private subnets share one route table: the same NAT ID works in every zone.
   PrivateRouteTable:
@@ -162,7 +207,8 @@ Resources:
     Properties:
       VpcId: !Ref Vpc
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-private" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-private"
 
   PrivateOutboundRoute:
     Type: AWS::EC2::Route
@@ -173,11 +219,15 @@ Resources:
 
   PrivateSubnetARoutes:
     Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties: { SubnetId: !Ref PrivateSubnetA, RouteTableId: !Ref PrivateRouteTable }
+    Properties:
+      SubnetId: !Ref PrivateSubnetA
+      RouteTableId: !Ref PrivateRouteTable
 
   PrivateSubnetBRoutes:
     Type: AWS::EC2::SubnetRouteTableAssociation
-    Properties: { SubnetId: !Ref PrivateSubnetB, RouteTableId: !Ref PrivateRouteTable }
+    Properties:
+      SubnetId: !Ref PrivateSubnetB
+      RouteTableId: !Ref PrivateRouteTable
 
   # =================================================================== Security groups
   # internet -> ALB :80 -> servers :8000. Nothing else comes in.
@@ -188,7 +238,11 @@ Resources:
       GroupDescription: Public entry point. HTTP in from anywhere; out only to the order servers.
       VpcId: !Ref Vpc
       SecurityGroupIngress:
-        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0, Description: Customers and merchants }
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: Customers and merchants
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 8000
@@ -196,7 +250,8 @@ Resources:
           DestinationSecurityGroupId: !Ref ServerSecurityGroup
           Description: Requests and health checks to the order servers
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-alb" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-alb"
 
   ServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -208,9 +263,14 @@ Resources:
         # Package updates, pip, git clone, Systems Manager and CloudFormation
         # signals all use HTTPS. DNS and time use VPC-internal link-local
         # services that security groups do not filter.
-        - { IpProtocol: tcp, FromPort: 443, ToPort: 443, CidrIp: 0.0.0.0/0, Description: HTTPS out for updates and AWS APIs }
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: HTTPS out for updates and AWS APIs
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-orders-servers" }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-orders-servers"
 
   ServerIngressFromAlb:
     Type: AWS::EC2::SecurityGroupIngress
@@ -229,10 +289,14 @@ Resources:
       Name: !Sub "onward-${Environment}-orders"
       Type: application
       Scheme: internet-facing
-      Subnets: [!Ref PublicSubnetA, !Ref PublicSubnetB]
-      SecurityGroups: [!Ref AlbSecurityGroup]
+      Subnets:
+        - !Ref PublicSubnetA
+        - !Ref PublicSubnetB
+      SecurityGroups:
+        - !Ref AlbSecurityGroup
       LoadBalancerAttributes:
-        - { Key: routing.http.drop_invalid_header_fields.enabled, Value: "true" }
+        - Key: routing.http.drop_invalid_header_fields.enabled
+          Value: "true"
 
   TargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -247,10 +311,15 @@ Resources:
       HealthCheckTimeoutSeconds: 5
       HealthyThresholdCount: 2
       UnhealthyThresholdCount: 2
-      Matcher: { HttpCode: "200" }
+      Matcher:
+        HttpCode: "200"
       TargetGroupAttributes:
-        - { Key: deregistration_delay.timeout_seconds, Value: "30" }   # drain fast on scale-in
-        - { Key: stickiness.enabled, Value: "false" }                  # spread every request
+        # drain fast on scale-in
+        - Key: deregistration_delay.timeout_seconds
+          Value: "30"
+        # spread every request
+        - Key: stickiness.enabled
+          Value: "false"
 
   HttpListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -259,7 +328,8 @@ Resources:
       Port: 80
       Protocol: HTTP
       DefaultActions:
-        - { Type: forward, TargetGroupArn: !Ref TargetGroup }
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
 
   # =================================================================== Server identity (managed policies only)
   ServerRole:
@@ -271,7 +341,8 @@ Resources:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
-            Principal: { Service: ec2.amazonaws.com }
+            Principal:
+              Service: ec2.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
@@ -280,7 +351,8 @@ Resources:
     Type: AWS::IAM::InstanceProfile
     Properties:
       InstanceProfileName: !Sub "onward-${Environment}-orders-server"
-      Roles: [!Ref ServerRole]
+      Roles:
+        - !Ref ServerRole
 
   # =================================================================== Servers
   LaunchTemplate:
@@ -290,14 +362,19 @@ Resources:
       TagSpecifications:
         - ResourceType: launch-template
           Tags:
-            - { Key: Project, Value: onward }
-            - { Key: Owner, Value: !Ref Owner }
-            - { Key: Environment, Value: !Ref Environment }
+            - Key: Project
+              Value: onward
+            - Key: Owner
+              Value: !Ref Owner
+            - Key: Environment
+              Value: !Ref Environment
       LaunchTemplateData:
         ImageId: !Ref LatestAmiId
         InstanceType: !Ref InstanceType
-        IamInstanceProfile: { Arn: !GetAtt ServerInstanceProfile.Arn }
-        SecurityGroupIds: [!Ref ServerSecurityGroup]
+        IamInstanceProfile:
+          Arn: !GetAtt ServerInstanceProfile.Arn
+        SecurityGroupIds:
+          - !Ref ServerSecurityGroup
         # No KeyName: there is no SSH key. Admin access is Session Manager.
         MetadataOptions:
           HttpTokens: required          # IMDSv2 only
@@ -309,20 +386,32 @@ Resources:
           CpuCredits: unlimited         # keeps CPU honest under load instead of throttling to baseline
         BlockDeviceMappings:
           - DeviceName: /dev/xvda
-            Ebs: { VolumeSize: 8, VolumeType: gp3, Encrypted: true, DeleteOnTermination: true }
+            Ebs:
+              VolumeSize: 8
+              VolumeType: gp3
+              Encrypted: true
+              DeleteOnTermination: true
         TagSpecifications:
           - ResourceType: volume
             Tags:
-              - { Key: Name, Value: !Sub "onward-${Environment}-orders" }
-              - { Key: Project, Value: onward }
-              - { Key: Owner, Value: !Ref Owner }
-              - { Key: Environment, Value: !Ref Environment }
+              - Key: Name
+                Value: !Sub "onward-${Environment}-orders"
+              - Key: Project
+                Value: onward
+              - Key: Owner
+                Value: !Ref Owner
+              - Key: Environment
+                Value: !Ref Environment
           - ResourceType: network-interface
             Tags:
-              - { Key: Name, Value: !Sub "onward-${Environment}-orders" }
-              - { Key: Project, Value: onward }
-              - { Key: Owner, Value: !Ref Owner }
-              - { Key: Environment, Value: !Ref Environment }
+              - Key: Name
+                Value: !Sub "onward-${Environment}-orders"
+              - Key: Project
+                Value: onward
+              - Key: Owner
+                Value: !Ref Owner
+              - Key: Environment
+                Value: !Ref Environment
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash
@@ -386,7 +475,11 @@ Resources:
 
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    DependsOn: [PrivateOutboundRoute, PrivateSubnetARoutes, PrivateSubnetBRoutes]   # servers need the NAT route to boot
+    # servers need the NAT route to boot
+    DependsOn:
+      - PrivateOutboundRoute
+      - PrivateSubnetARoutes
+      - PrivateSubnetBRoutes
     CreationPolicy:
       ResourceSignal:
         Count: !Ref MinSize
@@ -399,26 +492,42 @@ Resources:
         MaxBatchSize: 1
         PauseTime: PT15M
         WaitOnResourceSignals: true
-        SuspendProcesses: [HealthCheck, ReplaceUnhealthy, AZRebalance, AlarmNotification, ScheduledActions]
+        SuspendProcesses:
+          - HealthCheck
+          - ReplaceUnhealthy
+          - AZRebalance
+          - AlarmNotification
+          - ScheduledActions
     Properties:
       AutoScalingGroupName: !Sub "onward-${Environment}-orders"
-      VPCZoneIdentifier: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
+      VPCZoneIdentifier:
+        - !Ref PrivateSubnetA
+        - !Ref PrivateSubnetB
       LaunchTemplate:
         LaunchTemplateId: !Ref LaunchTemplate
         Version: !GetAtt LaunchTemplate.LatestVersionNumber
       MinSize: !Ref MinSize
       MaxSize: !Ref MaxSize
-      TargetGroupARNs: [!Ref TargetGroup]
+      TargetGroupARNs:
+        - !Ref TargetGroup
       HealthCheckType: ELB              # replace servers the load balancer finds unhealthy, not just dead ones
       HealthCheckGracePeriod: 300
       DefaultInstanceWarmup: 180
       MetricsCollection:
         - Granularity: 1Minute          # group size metrics for the dashboard (no charge)
       Tags:
-        - { Key: Name, Value: !Sub "onward-${Environment}-orders", PropagateAtLaunch: true }
-        - { Key: Project, Value: onward, PropagateAtLaunch: true }
-        - { Key: Owner, Value: !Ref Owner, PropagateAtLaunch: true }
-        - { Key: Environment, Value: !Ref Environment, PropagateAtLaunch: true }
+        - Key: Name
+          Value: !Sub "onward-${Environment}-orders"
+          PropagateAtLaunch: true
+        - Key: Project
+          Value: onward
+          PropagateAtLaunch: true
+        - Key: Owner
+          Value: !Ref Owner
+          PropagateAtLaunch: true
+        - Key: Environment
+          Value: !Ref Environment
+          PropagateAtLaunch: true
 
   CpuTargetTracking:
     Type: AWS::AutoScaling::ScalingPolicy
@@ -457,9 +566,12 @@ Resources:
                 - "nohup /opt/onward/venv/bin/python /opt/onward/src/scripts/cpu_spike.py --minutes {{ Minutes }} > /var/log/onward-cpu-spike.log 2>&1 &"
                 - "echo \"CPU spike started on $(hostname) for {{ Minutes }} minutes\""
       Tags:
-        - { Key: Project, Value: onward }
-        - { Key: Owner, Value: !Ref Owner }
-        - { Key: Environment, Value: !Ref Environment }
+        - Key: Project
+          Value: onward
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Environment
+          Value: !Ref Environment
 
   # =================================================================== Operations view
   Dashboard:
