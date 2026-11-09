@@ -98,11 +98,23 @@ Resources:
         Statement:
           - Sid: SyncToCloudFormation
             Effect: Allow
-            Action: [cloudformation:CreateChangeSet, cloudformation:DeleteChangeSet, cloudformation:DescribeChangeSet, cloudformation:DescribeStackEvents, cloudformation:DescribeStacks, cloudformation:ExecuteChangeSet, cloudformation:GetTemplate, cloudformation:ListChangeSets, cloudformation:ListStacks, cloudformation:ValidateTemplate]
+            Action:
+              - cloudformation:CreateChangeSet
+              - cloudformation:DeleteChangeSet
+              - cloudformation:DescribeChangeSet
+              - cloudformation:DescribeStackEvents
+              - cloudformation:DescribeStacks
+              - cloudformation:ExecuteChangeSet
+              - cloudformation:GetTemplate
+              - cloudformation:ListChangeSets
+              - cloudformation:ListStacks
+              - cloudformation:ValidateTemplate
             Resource: "*"
           - Sid: PolicyForManagedRules
             Effect: Allow
-            Action: [events:PutRule, events:PutTargets]
+            Action:
+              - events:PutRule
+              - events:PutTargets
             Resource: "*"
             Condition:
               StringEquals:
@@ -122,19 +134,54 @@ Resources:
         Statement:
           - Sid: ServicesUsedByTheStack
             Effect: Allow
-            Action: [ec2:*, elasticloadbalancing:*, autoscaling:*, cloudwatch:*]
+            Action:
+              - ec2:*
+              - elasticloadbalancing:*
+              - autoscaling:*
+              - cloudwatch:*
             Resource: "*"
           - Sid: ResolveLatestAmazonLinuxImage
             Effect: Allow
-            Action: [ssm:GetParameters, ssm:GetParameter]
+            Action:
+              - ssm:GetParameters
+              - ssm:GetParameter
             Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}::parameter/aws/service/*"
           - Sid: CpuSpikeDocumentOnly
             Effect: Allow
-            Action: [ssm:CreateDocument, ssm:UpdateDocument, ssm:DeleteDocument, ssm:DescribeDocument, ssm:GetDocument, ssm:UpdateDocumentDefaultVersion, ssm:AddTagsToResource, ssm:RemoveTagsFromResource, ssm:ListTagsForResource]
+            Action:
+              - ssm:CreateDocument
+              - ssm:UpdateDocument
+              - ssm:DeleteDocument
+              - ssm:DescribeDocument
+              - ssm:GetDocument
+              - ssm:UpdateDocumentDefaultVersion
+              - ssm:AddTagsToResource
+              - ssm:RemoveTagsFromResource
+              - ssm:ListTagsForResource
             Resource: !Sub "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:document/onward-*"
           - Sid: OnwardRolesProfilesOnly
             Effect: Allow
-            Action: [iam:CreateRole, iam:DeleteRole, iam:GetRole, iam:UpdateRole, iam:UpdateRoleDescription, iam:UpdateAssumeRolePolicy, iam:TagRole, iam:UntagRole, iam:AttachRolePolicy, iam:DetachRolePolicy, iam:ListAttachedRolePolicies, iam:ListRolePolicies, iam:PassRole, iam:CreateInstanceProfile, iam:DeleteInstanceProfile, iam:GetInstanceProfile, iam:AddRoleToInstanceProfile, iam:RemoveRoleFromInstanceProfile, iam:TagInstanceProfile, iam:ListInstanceProfilesForRole]
+            Action:
+              - iam:CreateRole
+              - iam:DeleteRole
+              - iam:GetRole
+              - iam:UpdateRole
+              - iam:UpdateRoleDescription
+              - iam:UpdateAssumeRolePolicy
+              - iam:TagRole
+              - iam:UntagRole
+              - iam:AttachRolePolicy
+              - iam:DetachRolePolicy
+              - iam:ListAttachedRolePolicies
+              - iam:ListRolePolicies
+              - iam:PassRole
+              - iam:CreateInstanceProfile
+              - iam:DeleteInstanceProfile
+              - iam:GetInstanceProfile
+              - iam:AddRoleToInstanceProfile
+              - iam:RemoveRoleFromInstanceProfile
+              - iam:TagInstanceProfile
+              - iam:ListInstanceProfilesForRole
             Resource: [!Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/onward-*", !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:instance-profile/onward-*"]
           - Sid: ServiceLinkedRoles
             Effect: Allow
@@ -145,7 +192,12 @@ Resources:
                 "iam:AWSServiceName": [autoscaling.amazonaws.com, elasticloadbalancing.amazonaws.com]
           - Sid: EnforceCompanyAccessStandard
             Effect: Deny
-            Action: [iam:PutRolePolicy, iam:PutUserPolicy, iam:PutGroupPolicy, iam:CreateUser, iam:CreateAccessKey]
+            Action:
+              - iam:PutRolePolicy
+              - iam:PutUserPolicy
+              - iam:PutGroupPolicy
+              - iam:CreateUser
+              - iam:CreateAccessKey
             Resource: "*"
 
   GitSyncRole:
