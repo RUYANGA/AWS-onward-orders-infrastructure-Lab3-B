@@ -15,7 +15,8 @@ customers ──► Application Load Balancer (public subnets, the ONLY public r
          Regional NAT Gateway ──► internet (updates, packages, GitHub, AWS APIs)
 ```
 
-Diagrams: [docs/architecture.md](docs/architecture.md). Decisions and cost: [docs/decisions.md](docs/decisions.md).
+Discovery report: [docs/discovery-report.md](docs/discovery-report.md). Diagrams: [docs/architecture.md](docs/architecture.md).
+Decisions and cost: [docs/decisions.md](docs/decisions.md).
 
 ## Repository layout
 
