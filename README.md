@@ -5,17 +5,9 @@ one CloudFormation template, deployed from this repository by Git sync. The orde
 application itself lives in its own repository,
 [AWS-onward-orders-app-Lab3-B](https://github.com/RUYANGA/AWS-onward-orders-app-Lab3-B); the servers clone it at boot.
 
-```
-customers ──► Application Load Balancer (public subnets, the ONLY public resource)
-                 │  :8000, from the ALB's security group only
-                 ▼
-         Auto Scaling group, 2–6 × t3.micro Amazon Linux 2023 (private subnets, 2 AZs)
-                 │  HTTPS out only
-                 ▼
-         Regional NAT Gateway ──► internet (updates, packages, GitHub, AWS APIs)
-```
+![Architecture: Onward sales-day order system on Amazon EC2](docs/images/architecture.png)
 
-Discovery report: [docs/discovery-report.md](docs/discovery-report.md). Diagrams: [docs/architecture.md](docs/architecture.md).
+Discovery report: [docs/discovery-report.md](docs/discovery-report.md). More diagrams: [docs/architecture.md](docs/architecture.md).
 Decisions and cost: [docs/decisions.md](docs/decisions.md).
 
 ## Repository layout

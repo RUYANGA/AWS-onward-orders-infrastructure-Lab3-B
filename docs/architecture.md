@@ -1,5 +1,16 @@
 # Onward sales-day order system: architecture
 
+![Architecture: Onward sales-day order system on Amazon EC2](images/architecture.png)
+
+Solid dark lines are allowed inbound traffic with the security group rule that allows it,
+purple dashed lines are outbound-only traffic through the Regional NAT Gateway, and pink dashed
+lines are deployment, management and platform services. Faded servers are the extra servers
+Auto Scaling adds on sales days.
+
+The image is drawn by [diagrams/architecture.py](diagrams/architecture.py) with the official AWS
+icons, and is also saved as [images/architecture.svg](images/architecture.svg). After changing
+the design, run `pip install diagrams cairosvg` and then `python docs/diagrams/architecture.py`.
+
 ## Inside the VPC (eu-west-1, two Availability Zones)
 
 ```mermaid
