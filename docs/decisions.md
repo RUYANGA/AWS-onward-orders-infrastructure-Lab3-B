@@ -19,29 +19,17 @@
 
 ## Cost
 
-Approximate US East list prices (eu-west-1 is slightly higher; confirm in the AWS Pricing
-Calculator). Regional NAT Gateway: $0.045 per hour for each zone it serves plus $0.045 per GB
-([Amazon VPC pricing](https://aws.amazon.com/vpc/pricing/)). Free Tier credits not counted.
+The full estimate, with live eu-west-1 prices, every line item and the inputs for the AWS
+Pricing Calculator, is in [cost-estimate.md](cost-estimate.md).
 
-A quiet day runs 2 servers for 24 h. A peak day runs 6 servers for the 8-hour event and 2 for
-the other 16 h, which is 80 server-hours.
+| Month | Estimated cost (USD) |
+| --- | --- |
+| Quiet month: 2 servers all month | 128.96 |
+| Busy month: 4 sales days, 6 servers for 8 hours each | 139.22 |
 
-| Item | Quiet day (USD) | Peak day (USD) |
-| --- | --- | --- |
-| Regional NAT Gateway, 2 zones | 2.16 | 2.16 |
-| NAT public IPv4, 1 per zone | 0.24 | 0.24 |
-| NAT data, 2 GB vs 5 GB | 0.09 | 0.23 |
-| Application Load Balancer + LCUs | 0.73 | 1.00 |
-| ALB public IPv4, 2 zones | 0.24 | 0.24 |
-| EC2 t3.micro, 48 vs 80 server-hours | 0.50 | 0.83 |
-| EBS gp3 8 GB per server | 0.04 | 0.06 |
-| Detailed monitoring | 0.14 | 0.23 |
-| **Total** | **≈ 4.14** | **≈ 4.99** |
-
-That is roughly $125 for a quiet month.
-
-The NAT gateway and load balancer are a fixed floor. Peak capacity costs well under $1 a day
-because it exists only for the hours it is needed. Keeping 6 servers all month instead would
-cost about $45 in compute against about $15 for the baseline of 2.
+The Regional NAT Gateway (billed per Availability Zone), the load balancer hours and four public
+IPv4 addresses are a fixed floor of USD 103.08 a month, 80% of a quiet month. Each sales day adds
+only about USD 2.57, because the extra servers exist only while they are needed. Keeping 6 servers
+all month would cost USD 49.93 in compute against USD 16.64 for the baseline of 2.
 
 Delete the stack after demos (`scripts/teardown.sh`) and rebuild from Git when needed.

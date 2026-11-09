@@ -1,0 +1,16 @@
+Service,Item,Quiet month quantity,Quiet month USD,Busy month quantity,Busy month USD
+Amazon EC2,t3.micro Linux on-demand,1460 instance-hours,16.64,1588 instance-hours,18.10
+Amazon EC2,T3 Unlimited surplus CPU credits,0 vCPU-hours,0.00,154 vCPU-hours,7.68
+Amazon EBS,gp3 root volumes,16.0 GB-month,1.41,17.4 GB-month,1.53
+Elastic Load Balancing,Application Load Balancer hours,730 hours,18.40,730 hours,18.40
+Elastic Load Balancing,ALB capacity units (LCU),36.5 LCU-hours,0.29,66.9 LCU-hours,0.54
+Amazon VPC,"Regional NAT Gateway, 2 AZs",1460 AZ-hours,70.08,1460 AZ-hours,70.08
+Amazon VPC,Regional NAT Gateway data processed,3 GB,0.14,11 GB,0.53
+Amazon VPC,Public IPv4 addresses,4 x 730 hours,14.60,4 x 730 hours,14.60
+Amazon CloudWatch,EC2 detailed monitoring metrics,14.00 metric-months,4.20,15.23 metric-months,4.57
+Amazon CloudWatch,Target tracking alarms,2 alarms,0.20,2 alarms,0.20
+Amazon CloudWatch,Dashboard,1 dashboard,3.00,1 dashboard,3.00
+AWS Data Transfer,Out to internet (100 GB/month free),0 GB billable,0.00,0 GB billable,0.00
+AWS Systems Manager,"Session Manager, Run Command",included,0.00,included,0.00
+AWS CloudFormation,"Git sync, CodeConnections",included,0.00,included,0.00
+Total,,,128.96,,139.22
