@@ -34,8 +34,17 @@ Parameters:
       Leave empty to create onward-<env>-github, which must then be authorised once in the console.
     AllowedPattern: ^$|^arn:aws[a-z-]*:(codeconnections|codestar-connections):[a-z0-9-]+:[0-9]{12}:connection/[0-9a-f-]+$
 
+  CreateNatGatewayServiceLinkedRole:
+    Type: String
+    AllowedValues: ["true", "false"]
+    Default: "true"
+    Description: >-
+      Creates AWSServiceRoleForNATGateway, which the first Regional NAT Gateway in an
+      account needs. Set to false if the account already has it (scripts/bootstrap.sh checks).
+
 Conditions:
   IsConnectionReady: !Equals [!Ref ConnectionReady, "true"]
+  CreateNatSlr: !Equals [!Ref CreateNatGatewayServiceLinkedRole, "true"]
   CreateConnection: !Equals [!Ref ExistingConnectionArn, ""]
 
 Resources:
@@ -67,6 +76,17 @@ Resources:
           Value: !Ref Owner
         - Key: Environment
           Value: !Ref Environment
+
+  # The Regional NAT Gateway in templates/orders.yaml needs this AWS-managed role. Creating it
+  # here keeps the Git sync role from needing permission to create IAM roles.
+  NatGatewayServiceLinkedRole:
+    Type: AWS::IAM::ServiceLinkedRole
+    Condition: CreateNatSlr
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      AWSServiceName: ec2-nat-gateway.amazonaws.com
+      Description: Lets Amazon VPC manage Regional NAT Gateways (created by onward bootstrap).
 
   GitSyncPolicy:
     Type: AWS::IAM::ManagedPolicy
