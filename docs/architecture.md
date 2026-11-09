@@ -2,10 +2,14 @@
 
 ![Architecture: Onward sales-day order system on Amazon EC2](images/architecture.png)
 
-Orange arrows are customer traffic (the only way in), blue arrows are outbound-only traffic
-through the Regional NAT Gateway, and grey dashed arrows are deployment and operations.
-The image is generated from [diagrams/architecture.py](diagrams/architecture.py) with official
-AWS icons; rerun `python docs/diagrams/architecture.py` after changing the design.
+Solid dark lines are allowed inbound traffic with the security group rule that allows it,
+purple dashed lines are outbound-only traffic through the Regional NAT Gateway, and pink dashed
+lines are deployment, management and platform services. Faded servers are the extra servers
+Auto Scaling adds on sales days.
+
+The image is drawn by [diagrams/architecture.py](diagrams/architecture.py) with the official AWS
+icons, and is also saved as [images/architecture.svg](images/architecture.svg). After changing
+the design, run `pip install diagrams cairosvg` and then `python docs/diagrams/architecture.py`.
 
 ## Inside the VPC (eu-west-1, two Availability Zones)
 
