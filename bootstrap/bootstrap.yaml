@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: >-
   Onward Logistics, one-time bootstrap that turns on CloudFormation Git sync
   for the sales-day order stack (onward-<env>-orders). It creates the GitHub
-  connection, the Git sync role and the sync configuration. Git sync cannot
+  connection (or reuses an existing one), the Git sync role and the sync configuration. Git sync cannot
   create the thing that enables Git sync, so only this stack is deployed with
   the CLI (scripts/bootstrap.sh); the order system itself is deployed from Git.
 
@@ -26,13 +26,22 @@ Parameters:
     AllowedValues: ["true", "false"]
     Default: "false"
     Description: Set to true after authorising the GitHub connection in the console.
+  ExistingConnectionArn:
+    Type: String
+    Default: ""
+    Description: >-
+      ARN of an AVAILABLE GitHub connection to reuse (one connection can link many repositories).
+      Leave empty to create onward-<env>-github, which must then be authorised once in the console.
+    AllowedPattern: ^$|^arn:aws[a-z-]*:(codeconnections|codestar-connections):[a-z0-9-]+:[0-9]{12}:connection/[0-9a-f-]+$
 
 Conditions:
   IsConnectionReady: !Equals [!Ref ConnectionReady, "true"]
+  CreateConnection: !Equals [!Ref ExistingConnectionArn, ""]
 
 Resources:
   GitHubConnection:
     Type: AWS::CodeStarConnections::Connection
+    Condition: CreateConnection
     Properties:
       ConnectionName: !Sub "onward-${Environment}-github"
       ProviderType: GitHub
@@ -48,7 +57,7 @@ Resources:
     Type: AWS::CodeStarConnections::RepositoryLink
     Condition: IsConnectionReady
     Properties:
-      ConnectionArn: !Ref GitHubConnection
+      ConnectionArn: !If [CreateConnection, !Ref GitHubConnection, !Ref ExistingConnectionArn]
       OwnerId: !Ref GitHubOwner
       RepositoryName: !Ref RepoName
       Tags:
@@ -158,7 +167,7 @@ Resources:
 
 Outputs:
   ConnectionArn:
-    Description: Authorise once in the console (Developer Tools > Settings > Connections).
-    Value: !Ref GitHubConnection
+    Description: The GitHub connection Git sync uses. A new one must be authorised once in the console.
+    Value: !If [CreateConnection, !Ref GitHubConnection, !Ref ExistingConnectionArn]
   GitSyncRoleArn:
     Value: !GetAtt GitSyncRole.Arn

@@ -74,6 +74,16 @@ change the owner, change it in `deployments/dev/orders.yaml` too.
 2. `./scripts/bootstrap.sh sync`. Git sync creates `onward-dev-orders` in about 8–12 minutes
    and the script prints the public address and dashboard link.
 
+**Already have an AVAILABLE GitHub connection** (for example from an earlier lab)? Reuse it and
+skip step 1 and the console: one connection can link several repositories. Its GitHub app must be
+allowed to read this repository (GitHub > Settings > Applications > AWS Connector for GitHub >
+Repository access).
+
+```bash
+aws codeconnections list-connections --query 'Connections[].[ConnectionName,ConnectionStatus,ConnectionArn]'
+CONNECTION_ARN=<arn of the AVAILABLE connection> ./scripts/bootstrap.sh sync
+```
+
 From then on, every commit that changes `templates/orders.yaml` or `deployments/dev/orders.yaml`
 updates the stack automatically.
 
