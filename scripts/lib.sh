@@ -8,6 +8,9 @@ ENVIRONMENT="${ENVIRONMENT:-dev}"
 OWNER="${OWNER:-Merci RUYANGA}"
 GITHUB_OWNER="${GITHUB_OWNER:-RUYANGA}"
 REPO_NAME="${REPO_NAME:-AWS-onward-orders-infrastructure-Lab3-B}"
+# Reuse an AVAILABLE GitHub connection instead of creating onward-<env>-github (skips the console step):
+#   CONNECTION_ARN=arn:aws:codeconnections:eu-west-1:<account>:connection/<id> ./scripts/bootstrap.sh sync
+CONNECTION_ARN="${CONNECTION_ARN:-}"
 export AWS_REGION AWS_DEFAULT_REGION="$AWS_REGION"
 STACK="onward-${ENVIRONMENT}-orders"
 ASG="onward-${ENVIRONMENT}-orders"
