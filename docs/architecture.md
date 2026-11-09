@@ -7,9 +7,8 @@ purple dashed lines are outbound-only traffic through the Regional NAT Gateway, 
 lines are deployment, management and platform services. Faded servers are the extra servers
 Auto Scaling adds on sales days.
 
-The image is drawn by [diagrams/architecture.py](diagrams/architecture.py) with the official AWS
-icons, and is also saved as [images/architecture.svg](images/architecture.svg). After changing
-the design, run `pip install diagrams cairosvg` and then `python docs/diagrams/architecture.py`.
+The diagram uses the official AWS architecture icons. A scalable version is saved as
+[images/architecture.svg](images/architecture.svg).
 
 ## Inside the VPC (eu-west-1, two Availability Zones)
 

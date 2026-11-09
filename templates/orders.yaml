@@ -55,7 +55,7 @@ Parameters:
     AllowedPattern: ^(\d{1,3}\.){3}\d{1,3}/16$
 
 Resources:
-  # =================================================================== Network
+  # Network
   Vpc:
     Type: AWS::EC2::VPC
     Properties:
@@ -196,7 +196,7 @@ Resources:
       SubnetId: !Ref PrivateSubnetB
       RouteTableId: !Ref PrivateRouteTable
 
-  # =================================================================== Security groups
+  # Security groups
   # internet -> ALB :80 -> servers :8000. Nothing else comes in.
   AlbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -249,7 +249,7 @@ Resources:
       SourceSecurityGroupId: !Ref AlbSecurityGroup
       Description: Only the load balancer may reach the app
 
-  # =================================================================== Load balancer
+  # Load balancer
   LoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -295,7 +295,7 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref TargetGroup
 
-  # =================================================================== Server identity (managed policies only)
+  #Server identity (managed policies only)
   ServerRole:
     Type: AWS::IAM::Role
     Properties:
@@ -316,7 +316,7 @@ Resources:
       InstanceProfileName: !Sub "onward-${Environment}-orders-server"
       Roles: [!Ref ServerRole]
 
-  # =================================================================== Servers
+  # Servers
   LaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -489,7 +489,7 @@ Resources:
           PredefinedMetricType: ASGAverageCPUUtilization
         TargetValue: !Ref CpuTargetPercent
 
-  # =================================================================== Load-spike demo (secure, no public trigger)
+  # Load-spike demo (secure, no public trigger)
   CpuSpikeDocument:
     Type: AWS::SSM::Document
     Properties:
@@ -521,7 +521,7 @@ Resources:
         - Key: Environment
           Value: !Ref Environment
 
-  # =================================================================== Operations view
+  # Operations view
   Dashboard:
     Type: AWS::CloudWatch::Dashboard
     Properties:
