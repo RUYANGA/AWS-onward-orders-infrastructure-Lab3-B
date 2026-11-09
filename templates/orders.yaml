@@ -20,7 +20,7 @@ Parameters:
     AllowedPattern: ^[^$`"\\]{2,64}$
   AppRepoUrl:
     Type: String
-    Description: Public HTTPS URL of this repository; servers clone the app from it at boot.
+    Description: Public HTTPS URL of the app repository (onward-orders-app); servers clone the app from it at boot.
     AllowedPattern: ^https://.+\.git$
   AppVersion:
     Type: String
@@ -432,7 +432,7 @@ Resources:
             git clone --quiet '${AppRepoUrl}' /opt/onward/src
             git -C /opt/onward/src checkout --quiet '${AppVersion}'
             python3.11 -m venv /opt/onward/venv
-            /opt/onward/venv/bin/pip install --quiet -r /opt/onward/src/app/requirements.txt
+            /opt/onward/venv/bin/pip install --quiet -r /opt/onward/src/requirements.txt
 
             mkdir -p /etc/onward
             cat > /etc/onward/app.env <<'ENVFILE'
@@ -452,7 +452,7 @@ Resources:
 
             [Service]
             User=onward
-            WorkingDirectory=/opt/onward/src/app
+            WorkingDirectory=/opt/onward/src
             EnvironmentFile=/etc/onward/app.env
             ExecStart=/opt/onward/venv/bin/gunicorn -c gunicorn.conf.py wsgi:app
             Restart=always

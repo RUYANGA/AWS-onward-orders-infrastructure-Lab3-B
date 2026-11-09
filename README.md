@@ -1,8 +1,9 @@
-# onward-orders-ec2
+# onward-orders-infrastructure
 
-The Onward Logistics order system, built to survive sales days: one CloudFormation
-template (deployed from this repository by Git sync) and one full-stack Python
-application (the UI and order logic served together by Flask).
+The AWS infrastructure for the Onward Logistics order system, built to survive sales days:
+one CloudFormation template, deployed from this repository by Git sync. The order
+application itself lives in its own repository,
+[onward-orders-app](https://github.com/RUYANGA/onward-orders-app); the servers clone it at boot.
 
 ```
 customers ──► Application Load Balancer (public subnets, the ONLY public resource)
@@ -23,8 +24,6 @@ templates/orders.yaml        the whole environment: VPC, Regional NAT, ALB, laun
                              Auto Scaling group + CPU policy, Run Command document, dashboard
 deployments/dev/orders.yaml  Git sync deployment file: parameters and tags for onward-dev-orders
 bootstrap/bootstrap.yaml     turns Git sync on (GitHub connection, Git sync role, sync config)
-app/                         the order application (Flask), its tests and gunicorn settings
-scripts/cpu_spike.py         time-limited CPU burner, run on servers only via Run Command
 scripts/bootstrap.sh         build or rebuild from scratch
 scripts/teardown.sh          delete after a demo (cost control)
 scripts/check_standards.sh   no inline policies, IAM users, keys, SSH or port 22 (also in CI)
@@ -38,8 +37,9 @@ at first boot on every server:
 
 1. `dnf upgrade --security` (outbound through the NAT gateway).
 2. Installs `git`, Python 3.11 and the CloudFormation helper scripts.
-3. Clones **this repository** at `AppVersion` (a branch, tag or commit SHA) into `/opt/onward/src`
-   and installs `app/requirements.txt` into a virtualenv.
+3. Clones the app repository (`AppRepoUrl`, [onward-orders-app](https://github.com/RUYANGA/onward-orders-app))
+   at `AppVersion` (a branch, tag or commit SHA) into `/opt/onward/src` and installs its
+   `requirements.txt` into a virtualenv.
 4. Writes `/etc/onward/app.env` (owner name, environment, version) and starts the
    `onward-orders` systemd service (gunicorn on :8000, runs as an unprivileged user,
    restarts on failure, read-only system directories).
@@ -49,8 +49,8 @@ The page shows the owner's name, the lab name, and the instance ID, Availability
 private IP of the server that answered (read from IMDSv2). Responses are never cached,
 so each refresh goes back through the load balancer.
 
-**Releasing a new app version:** set `AppVersion` in `deployments/dev/orders.yaml` to the
-new tag or commit SHA and commit. Git sync updates the launch template and CloudFormation
+**Releasing a new app version:** tag the release in onward-orders-app, then set `AppVersion`
+in `deployments/dev/orders.yaml` here to that tag or commit SHA and commit. Git sync updates the launch template and CloudFormation
 replaces servers one at a time, keeping at least one in service.
 
 ## Company standards
@@ -69,9 +69,10 @@ replaces servers one at a time, keeping at least one in service.
 
 ## Build or rebuild from scratch
 
-Prerequisites: AWS CLI v2 signed in through SSO or a role; this repository pushed to GitHub
-as a **public** repository (servers clone it without credentials). The region (`eu-west-1`),
-environment (`dev`), owner and GitHub repository are defaults in `scripts/lib.sh`, so there is
+Prerequisites: AWS CLI v2 signed in through SSO or a role; this repository on GitHub (Git sync
+reads it), and onward-orders-app as a **public** repository (servers clone it without
+credentials). The region (`eu-west-1`),
+environment (`dev`), owner and infrastructure repository are defaults in `scripts/lib.sh`, so there is
 nothing to configure; override one for a single run with e.g. `ENVIRONMENT=test`. If you
 change the owner, change it in `deployments/dev/orders.yaml` too.
 
@@ -103,12 +104,3 @@ Demo tips: the CPU spike makes the 2 existing servers busy, so target tracking a
 2 more to bring the average back to 50%. The load test spreads load over all servers and
 can push the group further. t3 instances run in "unlimited" mode, so CPU is not throttled
 during the demo; a 10-minute spike costs a few cents in surplus credits.
-
-## Run the app locally
-
-```bash
-cd app
-python3.11 -m venv .venv && . .venv/bin/activate
-pip install -r requirements-dev.txt && python -m pytest -q
-OWNER_NAME="Merci RUYANGA" flask --app wsgi run --port 8000
-```
