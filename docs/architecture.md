@@ -53,7 +53,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  git["GitHub: onward-orders-infrastructure<br/>templates/orders.yaml + deployments/dev/orders.yaml"] -->|Git sync| cfn["CloudFormation stack onward-dev-orders"]
+  git["GitHub: AWS-onward-orders-infrastructure-Lab3-B<br/>templates/orders.yaml + deployments/dev/orders.yaml"] -->|Git sync| cfn["CloudFormation stack onward-dev-orders"]
   cfn --> res["VPC, Regional NAT, ALB, launch template,<br/>Auto Scaling group, Run Command document, dashboard"]
-  app["GitHub: onward-orders-app<br/>at AppVersion"] -->|git clone at boot, through NAT| res
+  app["GitHub: AWS-onward-orders-app-Lab3-B<br/>at AppVersion"] -->|git clone at boot, through NAT| res
 ```

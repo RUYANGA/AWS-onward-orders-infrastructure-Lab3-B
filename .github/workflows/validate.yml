@@ -1,5 +1,5 @@
 # Runs on every pull request: Git sync deploys whatever lands on main, so broken
-# or non-compliant templates must never get there. App tests run in onward-orders-app.
+# or non-compliant templates must never get there. App tests run in AWS-onward-orders-app-Lab3-B.
 name: validate
 on:
   pull_request:

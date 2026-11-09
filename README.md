@@ -1,9 +1,9 @@
-# onward-orders-infrastructure
+# AWS-onward-orders-infrastructure-Lab3-B
 
 The AWS infrastructure for the Onward Logistics order system, built to survive sales days:
 one CloudFormation template, deployed from this repository by Git sync. The order
 application itself lives in its own repository,
-[onward-orders-app](https://github.com/RUYANGA/onward-orders-app); the servers clone it at boot.
+[AWS-onward-orders-app-Lab3-B](https://github.com/RUYANGA/AWS-onward-orders-app-Lab3-B); the servers clone it at boot.
 
 ```
 customers ──► Application Load Balancer (public subnets, the ONLY public resource)
@@ -37,7 +37,7 @@ at first boot on every server:
 
 1. `dnf upgrade --security` (outbound through the NAT gateway).
 2. Installs `git`, Python 3.11 and the CloudFormation helper scripts.
-3. Clones the app repository (`AppRepoUrl`, [onward-orders-app](https://github.com/RUYANGA/onward-orders-app))
+3. Clones the app repository (`AppRepoUrl`, [AWS-onward-orders-app-Lab3-B](https://github.com/RUYANGA/AWS-onward-orders-app-Lab3-B))
    at `AppVersion` (a branch, tag or commit SHA) into `/opt/onward/src` and installs its
    `requirements.txt` into a virtualenv.
 4. Writes `/etc/onward/app.env` (owner name, environment, version) and starts the
@@ -49,7 +49,7 @@ The page shows the owner's name, the lab name, and the instance ID, Availability
 private IP of the server that answered (read from IMDSv2). Responses are never cached,
 so each refresh goes back through the load balancer.
 
-**Releasing a new app version:** tag the release in onward-orders-app, then set `AppVersion`
+**Releasing a new app version:** tag the release in AWS-onward-orders-app-Lab3-B, then set `AppVersion`
 in `deployments/dev/orders.yaml` here to that tag or commit SHA and commit. Git sync updates the launch template and CloudFormation
 replaces servers one at a time, keeping at least one in service.
 
@@ -70,7 +70,7 @@ replaces servers one at a time, keeping at least one in service.
 ## Build or rebuild from scratch
 
 Prerequisites: AWS CLI v2 signed in through SSO or a role; this repository on GitHub (Git sync
-reads it), and onward-orders-app as a **public** repository (servers clone it without
+reads it), and AWS-onward-orders-app-Lab3-B as a **public** repository (servers clone it without
 credentials). The region (`eu-west-1`),
 environment (`dev`), owner and infrastructure repository are defaults in `scripts/lib.sh`, so there is
 nothing to configure; override one for a single run with e.g. `ENVIRONMENT=test`. If you
