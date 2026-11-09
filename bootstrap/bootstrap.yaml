@@ -122,7 +122,7 @@ Resources:
             Resource: "*"
             Condition:
               StringEquals:
-                "iam:AWSServiceName": [autoscaling.amazonaws.com, elasticloadbalancing.amazonaws.com]
+                "iam:AWSServiceName": [autoscaling.amazonaws.com, elasticloadbalancing.amazonaws.com, ec2-nat-gateway.amazonaws.com]   # last: Regional NAT Gateway (AWSServiceRoleForNATGateway)
           - Sid: EnforceCompanyAccessStandard
             Effect: Deny
             Action: [iam:PutRolePolicy, iam:PutUserPolicy, iam:PutGroupPolicy, iam:CreateUser, iam:CreateAccessKey]
