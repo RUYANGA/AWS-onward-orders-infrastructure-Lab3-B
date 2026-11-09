@@ -48,6 +48,12 @@ I chose an Auto Scaling group of 2 to 6 small servers across two Availability Zo
 
 The servers are identical and disposable. Each one installs the order application from Git at a pinned version when it boots, so a replacement is always the same as the server it replaces. The whole environment is one CloudFormation template that Git sync deploys from GitHub, so every change is reviewed and the system can be rebuilt from the repository.
 
+**Architecture of the chosen design**
+
+![Architecture: Onward sales-day order system on Amazon EC2](images/architecture.png)
+
+*Customers reach only the load balancer. Servers in private subnets across two Availability Zones scale from 2 to 6 and reach the internet outbound only, through the Regional NAT Gateway. Faded servers are the ones added on sales days.*
+
 ### Services you will use
 
 | Service | The job it does | Why this service, used this way |
