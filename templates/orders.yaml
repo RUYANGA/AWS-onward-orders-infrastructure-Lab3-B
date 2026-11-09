@@ -10,10 +10,7 @@ Description: >-
 Parameters:
   Environment:
     Type: String
-    AllowedValues:
-      - dev
-      - test
-      - prod
+    AllowedValues: [dev, test, prod]
   Owner:
     Type: String
     Description: Your full name. Shown on the page and used in tags.
@@ -32,9 +29,7 @@ Parameters:
   InstanceType:
     Type: String
     Default: t3.micro
-    AllowedValues:
-      - t3.micro
-      - t2.micro
+    AllowedValues: [t3.micro, t2.micro]
     Description: Free Tier eligible types only.
   LatestAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
@@ -89,15 +84,8 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Select
-        - 0
-        - !GetAZs ""
-      CidrBlock: !Select
-        - 0
-        - !Cidr
-            - !Ref VpcCidr
-            - 4
-            - 8
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: !Select [0, !Cidr [!Ref VpcCidr, 4, 8]]
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
@@ -107,15 +95,8 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Select
-        - 1
-        - !GetAZs ""
-      CidrBlock: !Select
-        - 1
-        - !Cidr
-            - !Ref VpcCidr
-            - 4
-            - 8
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: !Select [1, !Cidr [!Ref VpcCidr, 4, 8]]
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
@@ -126,15 +107,8 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Select
-        - 0
-        - !GetAZs ""
-      CidrBlock: !Select
-        - 2
-        - !Cidr
-            - !Ref VpcCidr
-            - 4
-            - 8
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      CidrBlock: !Select [2, !Cidr [!Ref VpcCidr, 4, 8]]
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
@@ -144,15 +118,8 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref Vpc
-      AvailabilityZone: !Select
-        - 1
-        - !GetAZs ""
-      CidrBlock: !Select
-        - 3
-        - !Cidr
-            - !Ref VpcCidr
-            - 4
-            - 8
+      AvailabilityZone: !Select [1, !GetAZs ""]
+      CidrBlock: !Select [3, !Cidr [!Ref VpcCidr, 4, 8]]
       MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
@@ -289,11 +256,8 @@ Resources:
       Name: !Sub "onward-${Environment}-orders"
       Type: application
       Scheme: internet-facing
-      Subnets:
-        - !Ref PublicSubnetA
-        - !Ref PublicSubnetB
-      SecurityGroups:
-        - !Ref AlbSecurityGroup
+      Subnets: [!Ref PublicSubnetA, !Ref PublicSubnetB]
+      SecurityGroups: [!Ref AlbSecurityGroup]
       LoadBalancerAttributes:
         - Key: routing.http.drop_invalid_header_fields.enabled
           Value: "true"
@@ -344,15 +308,13 @@ Resources:
             Principal:
               Service: ec2.amazonaws.com
             Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"
+      ManagedPolicyArns: [!Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore"]
 
   ServerInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       InstanceProfileName: !Sub "onward-${Environment}-orders-server"
-      Roles:
-        - !Ref ServerRole
+      Roles: [!Ref ServerRole]
 
   # =================================================================== Servers
   LaunchTemplate:
@@ -373,8 +335,7 @@ Resources:
         InstanceType: !Ref InstanceType
         IamInstanceProfile:
           Arn: !GetAtt ServerInstanceProfile.Arn
-        SecurityGroupIds:
-          - !Ref ServerSecurityGroup
+        SecurityGroupIds: [!Ref ServerSecurityGroup]
         # No KeyName: there is no SSH key. Admin access is Session Manager.
         MetadataOptions:
           HttpTokens: required          # IMDSv2 only
@@ -476,10 +437,7 @@ Resources:
   AutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     # servers need the NAT route to boot
-    DependsOn:
-      - PrivateOutboundRoute
-      - PrivateSubnetARoutes
-      - PrivateSubnetBRoutes
+    DependsOn: [PrivateOutboundRoute, PrivateSubnetARoutes, PrivateSubnetBRoutes]
     CreationPolicy:
       ResourceSignal:
         Count: !Ref MinSize
@@ -492,24 +450,16 @@ Resources:
         MaxBatchSize: 1
         PauseTime: PT15M
         WaitOnResourceSignals: true
-        SuspendProcesses:
-          - HealthCheck
-          - ReplaceUnhealthy
-          - AZRebalance
-          - AlarmNotification
-          - ScheduledActions
+        SuspendProcesses: [HealthCheck, ReplaceUnhealthy, AZRebalance, AlarmNotification, ScheduledActions]
     Properties:
       AutoScalingGroupName: !Sub "onward-${Environment}-orders"
-      VPCZoneIdentifier:
-        - !Ref PrivateSubnetA
-        - !Ref PrivateSubnetB
+      VPCZoneIdentifier: [!Ref PrivateSubnetA, !Ref PrivateSubnetB]
       LaunchTemplate:
         LaunchTemplateId: !Ref LaunchTemplate
         Version: !GetAtt LaunchTemplate.LatestVersionNumber
       MinSize: !Ref MinSize
       MaxSize: !Ref MaxSize
-      TargetGroupARNs:
-        - !Ref TargetGroup
+      TargetGroupARNs: [!Ref TargetGroup]
       HealthCheckType: ELB              # replace servers the load balancer finds unhealthy, not just dead ones
       HealthCheckGracePeriod: 300
       DefaultInstanceWarmup: 180
@@ -562,9 +512,7 @@ Resources:
           - action: aws:runShellScript
             name: StartCpuSpike
             inputs:
-              runCommand:
-                - "nohup /opt/onward/venv/bin/python /opt/onward/src/scripts/cpu_spike.py --minutes {{ Minutes }} > /var/log/onward-cpu-spike.log 2>&1 &"
-                - "echo \"CPU spike started on $(hostname) for {{ Minutes }} minutes\""
+              runCommand: ["nohup /opt/onward/venv/bin/python /opt/onward/src/scripts/cpu_spike.py --minutes {{ Minutes }} > /var/log/onward-cpu-spike.log 2>&1 &", "echo \"CPU spike started on $(hostname) for {{ Minutes }} minutes\""]
       Tags:
         - Key: Project
           Value: onward

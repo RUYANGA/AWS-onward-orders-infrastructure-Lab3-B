@@ -17,6 +17,6 @@ jobs:
           python-version: "3.11"
       - run: pip install "cfn-lint>=1,<2"
       - name: Lint CloudFormation
-        run: cfn-lint --regions eu-west-1 --ignore-checks W2001 -- templates/*.yaml bootstrap/*.yaml
+        run: cfn-lint --regions eu-west-1 -- templates/*.yaml bootstrap/*.yaml
       - name: Company standards (no inline policies, users, keys or SSH)
         run: bash scripts/check_standards.sh
