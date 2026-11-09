@@ -5,7 +5,7 @@ parameters:
   Environment: dev
   Owner: Merci RUYANGA
   AppRepoUrl: https://github.com/RUYANGA/AWS-onward-orders-app-Lab3-B.git
-  AppVersion: main
+  AppVersion: v1.1.0
   InstanceType: t3.micro
   MinSize: "2"
   MaxSize: "6"
