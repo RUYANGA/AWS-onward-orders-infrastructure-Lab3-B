@@ -1,0 +1,10 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >-
+  Empty placeholder for onward-<env>-orders. CloudFormation Git sync only updates
+  stacks that already exist, so scripts/bootstrap.sh creates the stack from this
+  template before turning Git sync on. Git sync then replaces it with
+  templates/orders.yaml using the parameters in deployments/<env>/orders.yaml.
+
+Resources:
+  GitSyncPlaceholder:
+    Type: AWS::CloudFormation::WaitConditionHandle
