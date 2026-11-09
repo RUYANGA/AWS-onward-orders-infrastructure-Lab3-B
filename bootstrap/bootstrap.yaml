@@ -12,6 +12,7 @@ Parameters:
     AllowedValues: [dev, test, prod]
   Owner:
     Type: String
+    Description: Your full name. Used in the Owner tag on every resource.
   GitHubOwner:
     Type: String
   RepoName:
@@ -35,6 +36,13 @@ Resources:
     Properties:
       ConnectionName: !Sub "onward-${Environment}-github"
       ProviderType: GitHub
+      Tags:
+        - Key: Project
+          Value: onward
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Environment
+          Value: !Ref Environment
 
   RepositoryLink:
     Type: AWS::CodeStarConnections::RepositoryLink
@@ -43,6 +51,13 @@ Resources:
       ConnectionArn: !Ref GitHubConnection
       OwnerId: !Ref GitHubOwner
       RepositoryName: !Ref RepoName
+      Tags:
+        - Key: Project
+          Value: onward
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Environment
+          Value: !Ref Environment
 
   GitSyncPolicy:
     Type: AWS::IAM::ManagedPolicy
@@ -120,6 +135,13 @@ Resources:
               StringEquals:
                 "aws:SourceAccount": !Ref AWS::AccountId
       ManagedPolicyArns: [!Ref GitSyncPolicy, !Ref StackResourcesPolicy]
+      Tags:
+        - Key: Project
+          Value: onward
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: Environment
+          Value: !Ref Environment
 
   OrdersSync:
     Type: AWS::CodeStarConnections::SyncConfiguration
