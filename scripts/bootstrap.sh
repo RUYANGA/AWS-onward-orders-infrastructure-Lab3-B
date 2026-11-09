@@ -16,6 +16,13 @@ if [[ -n "$CONNECTION_ARN" ]]; then
   ready=true
 fi
 
+# Git sync only updates stacks that already exist: create an empty placeholder first.
+if [[ $ready == true ]] && ! aws cloudformation describe-stacks --stack-name "$STACK" >/dev/null 2>&1; then
+  say "Creating the empty placeholder stack $STACK (Git sync only updates existing stacks)"
+  aws cloudformation deploy --stack-name "$STACK" --template-file "$ROOT/templates/gitsync-placeholder.yaml" \
+    --no-fail-on-empty-changeset --tags Project=onward "Owner=$OWNER" "Environment=$ENVIRONMENT"
+fi
+
 # GitHub owner names are case-insensitive, but the repository link only accepts lowercase.
 say "Deploying onward-$ENVIRONMENT-bootstrap ($phase)"
 aws cloudformation deploy --stack-name "onward-$ENVIRONMENT-bootstrap" \
@@ -29,11 +36,12 @@ if [[ $phase == connection && -z "$CONNECTION_ARN" ]]; then
   echo "Then run: ./scripts/bootstrap.sh sync"; exit 0
 fi
 
-say "Waiting for Git sync to create $STACK (about 8-12 minutes: NAT gateway, load balancer, 2 servers booting)"
+say "Waiting for Git sync to build $STACK (about 8-12 minutes: NAT gateway, load balancer, 2 servers booting)"
 for _ in $(seq 1 80); do
   s=$(aws cloudformation describe-stacks --stack-name "$STACK" --query 'Stacks[0].StackStatus' --output text 2>/dev/null || echo WAITING)
   echo "$(date +%T) $s"
-  case "$s" in CREATE_COMPLETE|UPDATE_COMPLETE) break ;; *FAILED|ROLLBACK_COMPLETE) echo "See the stack events"; exit 1 ;; esac
+  # The placeholder is CREATE_COMPLETE; Git sync's real template arrives as an update.
+  case "$s" in UPDATE_COMPLETE) break ;; *ROLLBACK*|*FAILED) echo "See the stack events"; exit 1 ;; esac
   sleep 20
 done
 say "Order system: $(out AppUrl)"

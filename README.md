@@ -71,7 +71,8 @@ change the owner, change it in `deployments/dev/orders.yaml` too.
 
 1. `./scripts/bootstrap.sh connection`, then authorise the GitHub connection once in the
    console. AWS requires a person to approve access to GitHub; it is the only console step.
-2. `./scripts/bootstrap.sh sync`. Git sync creates `onward-dev-orders` in about 8–12 minutes
+2. `./scripts/bootstrap.sh sync`. Git sync only updates stacks that already exist, so the script first
+   creates `onward-dev-orders` from an empty placeholder template; Git sync then builds it in about 8–12 minutes
    and the script prints the public address and dashboard link.
 
 **Already have an AVAILABLE GitHub connection** (for example from an earlier lab)? Reuse it and
