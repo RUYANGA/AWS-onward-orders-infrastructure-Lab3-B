@@ -7,7 +7,8 @@ application itself lives in its own repository,
 
 ![Architecture: Onward sales-day order system on Amazon EC2](docs/images/architecture.png)
 
-More diagrams: [docs/architecture.md](docs/architecture.md). Decisions and cost: [docs/decisions.md](docs/decisions.md).
+Discovery report: [docs/discovery-report.md](docs/discovery-report.md). More diagrams: [docs/architecture.md](docs/architecture.md).
+Decisions and cost: [docs/decisions.md](docs/decisions.md).
 
 ## Repository layout
 
