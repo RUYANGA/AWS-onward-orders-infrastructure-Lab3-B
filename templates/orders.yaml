@@ -20,7 +20,7 @@ Parameters:
     AllowedPattern: ^[^$`"\\]{2,64}$
   AppRepoUrl:
     Type: String
-    Description: Public HTTPS URL of the app repository (onward-orders-app); servers clone the app from it at boot.
+    Description: Public HTTPS URL of the app repository (AWS-onward-orders-app-Lab3-B); servers clone the app from it at boot.
     AllowedPattern: ^https://.+\.git$
   AppVersion:
     Type: String

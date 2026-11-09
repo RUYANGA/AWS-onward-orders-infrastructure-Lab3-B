@@ -4,7 +4,7 @@ template-file-path: templates/orders.yaml
 parameters:
   Environment: dev
   Owner: Merci RUYANGA
-  AppRepoUrl: https://github.com/RUYANGA/onward-orders-app.git
+  AppRepoUrl: https://github.com/RUYANGA/AWS-onward-orders-app-Lab3-B.git
   AppVersion: main
   InstanceType: t3.micro
   MinSize: "2"

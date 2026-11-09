@@ -19,7 +19,7 @@ Parameters:
     Type: String
   RepoName:
     Type: String
-    Default: onward-orders-infrastructure
+    Default: AWS-onward-orders-infrastructure-Lab3-B
   Branch:
     Type: String
     Default: main
