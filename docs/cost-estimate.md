@@ -4,6 +4,12 @@ On-demand list prices from the AWS Price List API, fetched 9 November 2026. They
 credits, Savings Plans or account-specific discounts. The line items are also in
 [cost-estimate.csv](cost-estimate.csv).
 
+**AWS Pricing Calculator estimate:** USD 129.35 a month, USD 1,552.20 for 12 months.
+- Export: [cost-estimate-calculator.pdf](cost-estimate-calculator.pdf)
+- Live estimate: https://calculator.aws/#/estimate?id=34490496cef73bdbbd0db75c2f11bd4879920187
+
+See [Calculator result](#calculator-result) for how it matches the figures below.
+
 ## Summary
 
 | Month | Servers | Estimated cost (USD) |
@@ -148,9 +154,9 @@ The calculator has no field for T3 surplus CPU credits, which add up to USD 7.68
 
 ### Export and share the estimate
 
-- **Name it:** choose **Edit** next to *My Estimate* and name it `onward-dev-orders (eu-west-1)`.
-- **Export:** choose **Export** and pick **PDF**, **CSV** or **JSON**. Save the file into this folder as
-  `docs/cost-estimate-calculator.pdf` (or `.csv`) and commit it with this document.
-- **Share:** choose **Share**, then **Agree and continue**, to get a public link. Paste the link here:
-
-  Calculator link: _(add after creating the estimate)_
+- **Export:** the PDF exported from the calculator on 9 November 2026 is
+  [cost-estimate-calculator.pdf](cost-estimate-calculator.pdf). To refresh it, open the estimate, choose
+  **Export** and then **PDF**, and replace the file.
+- **Share:** the estimate's public link is
+  https://calculator.aws/#/estimate?id=34490496cef73bdbbd0db75c2f11bd4879920187. Opening it shows the same
+  five services, and changes made there don't affect the saved PDF.

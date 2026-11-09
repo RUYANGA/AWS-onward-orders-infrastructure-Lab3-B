@@ -8,7 +8,7 @@ application itself lives in its own repository,
 ![Architecture: Onward sales-day order system on Amazon EC2](docs/images/architecture.png)
 
 Discovery report: [docs/discovery-report.md](docs/discovery-report.md). More diagrams: [docs/architecture.md](docs/architecture.md).
-Decisions: [docs/decisions.md](docs/decisions.md). Cost estimate: [docs/cost-estimate.md](docs/cost-estimate.md).
+Decisions: [docs/decisions.md](docs/decisions.md). Cost estimate: [docs/cost-estimate.md](docs/cost-estimate.md) (AWS Pricing Calculator export: [PDF](docs/cost-estimate-calculator.pdf), USD 129.35 a month).
 
 ## Repository layout
 
