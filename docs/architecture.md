@@ -1,5 +1,12 @@
 # Onward sales-day order system: architecture
 
+![Architecture: Onward sales-day order system on Amazon EC2](images/architecture.png)
+
+Orange arrows are customer traffic (the only way in), blue arrows are outbound-only traffic
+through the Regional NAT Gateway, and grey dashed arrows are deployment and operations.
+The image is generated from [diagrams/architecture.py](diagrams/architecture.py) with official
+AWS icons; rerun `python docs/diagrams/architecture.py` after changing the design.
+
 ## Inside the VPC (eu-west-1, two Availability Zones)
 
 ```mermaid
