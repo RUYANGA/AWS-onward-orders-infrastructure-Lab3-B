@@ -23,13 +23,18 @@ if [[ $ready == true ]] && ! aws cloudformation describe-stacks --stack-name "$S
     --no-fail-on-empty-changeset --tags Project=onward "Owner=$OWNER" "Environment=$ENVIRONMENT"
 fi
 
+# The Regional NAT Gateway needs AWSServiceRoleForNATGateway; the bootstrap creates it unless it exists.
+create_nat_slr=true
+aws iam get-role --role-name AWSServiceRoleForNATGateway >/dev/null 2>&1 && create_nat_slr=false
+
 # GitHub owner names are case-insensitive, but the repository link only accepts lowercase.
 say "Deploying onward-$ENVIRONMENT-bootstrap ($phase)"
 aws cloudformation deploy --stack-name "onward-$ENVIRONMENT-bootstrap" \
   --template-file "$ROOT/bootstrap/bootstrap.yaml" --capabilities CAPABILITY_NAMED_IAM \
   --no-fail-on-empty-changeset --tags Project=onward "Owner=$OWNER" "Environment=$ENVIRONMENT" \
   --parameter-overrides "Environment=$ENVIRONMENT" "Owner=$OWNER" "GitHubOwner=${GITHUB_OWNER,,}" \
-    "RepoName=$REPO_NAME" "ConnectionReady=$ready" "ExistingConnectionArn=$CONNECTION_ARN"
+    "RepoName=$REPO_NAME" "ConnectionReady=$ready" "ExistingConnectionArn=$CONNECTION_ARN" \
+    "CreateNatGatewayServiceLinkedRole=$create_nat_slr"
 
 if [[ $phase == connection && -z "$CONNECTION_ARN" ]]; then
   say "Authorise the connection: Console > Developer Tools > Settings > Connections > onward-$ENVIRONMENT-github > Update pending connection"
