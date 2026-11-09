@@ -44,7 +44,7 @@ Even Amazon faced this. On Prime Day 2018, internal documents reported by CNBC s
 
 ### Your chosen approach
 
-I chose an Auto Scaling group of 2 to 6 small servers across two Availability Zones in eu-west-1 (Ireland), behind one Application Load Balancer. It scales on average CPU with a 50% target. It is the only option that handles both a planned sale and a surprise spike without anyone watching, and it keeps the site up if a server or a whole zone fails. Onward pays for extra servers only during the rush. A peak day costs about USD 5 against about USD 4 for a quiet day. Keeping six servers running all month would cost about three times as much in compute.
+I chose an Auto Scaling group of 2 to 6 small servers across two Availability Zones in eu-west-1 (Ireland), behind one Application Load Balancer. It scales on average CPU with a 50% target. It is the only option that handles both a planned sale and a surprise spike without anyone watching, and it keeps the site up if a server or a whole zone fails. Onward pays for extra servers only during the rush. At eu-west-1 list prices a quiet day costs about USD 4.24 and a sales day about USD 6.80, so a quiet month comes to about USD 129 and a month with four sales days to about USD 139 (see [cost-estimate.md](cost-estimate.md)). Keeping six servers running all month would cost three times as much in compute.
 
 The servers are identical and disposable. Each one installs the order application from Git at a pinned version when it boots, so a replacement is always the same as the server it replaces. The whole environment is one CloudFormation template that Git sync deploys from GitHub, so every change is reviewed and the system can be rebuilt from the repository.
 
@@ -75,7 +75,7 @@ The servers are identical and disposable. Each one installs the order applicatio
 | CTO | The order site stays up during sales-day peaks and when a server or zone fails, without anyone intervening. | During a 10-minute CPU spike, the group grows from 2 to about 4 servers within 3 to 5 minutes and shrinks back about 15 minutes after the spike ends. With one server terminated or one zone removed, the public address keeps answering with no failed requests. |
 | Head of Operations | No one has to add or remove servers by hand on sales day. Failed servers are replaced automatically, and new versions roll out without downtime. | Zero manual scaling actions during a peak. A replacement server reaches InService on its own, and the dashboard shows desired and running servers matching throughout. |
 | Head of Security | Only the load balancer is public. There are no admin ports or keys, and every admin action is logged. | Servers have no public IP, no security group allows port 22, no key pairs exist, IMDSv2 is required, and `scripts/demo/1-security-check.sh` passes. |
-| Finance Lead | Extra capacity costs money only while it is used, with a known daily cost. | About USD 4.14 for a quiet day and USD 4.99 for a peak day (about USD 125 for a quiet month), against about USD 45 a month in compute alone if six servers ran all the time. |
+| Finance Lead | Extra capacity costs money only while it is used, with a known daily cost. | About USD 129 for a quiet month and USD 139 for a month with four sales days, against USD 49.93 a month in compute alone if six servers ran all the time ([cost-estimate.md](cost-estimate.md)). |
 
 ### Limits and risks of your design
 
