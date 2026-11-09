@@ -126,6 +126,26 @@ free-tier handling may move the total by a few dollars.
    - Standard resolution alarm metrics: **2**
 8. Check that the total for the quiet month is about **USD 129**, and about **USD 139** with step 3 added.
 
+### Calculator result
+
+The estimate built in the AWS Pricing Calculator on 9 November 2026 (Europe (Ireland), On-Demand):
+
+| Service | Description | Configuration | USD/month |
+| --- | --- | --- | ---: |
+| Amazon EC2 | Order servers - baseline (2 x t3.micro) | 2 x t3.micro, 100% of the month, 8 GB gp3, monitoring off, 20 GB out to the internet | 19.85 |
+| Amazon EC2 | Order servers - sales days (4 extra x 8 h x 4 days) | 4 x t3.micro, 32 hours a month, 8 GB gp3 | 1.59 |
+| Elastic Load Balancing | Public load balancer | 1 Application Load Balancer, 0.05 GB processed per hour | 18.69 |
+| Amazon VPC | Network - Regional NAT Gateway and public IPv4 | 1 Regional NAT Gateway in 2 AZs, 3 GB processed, 4 in-use public IPv4 | 84.82 |
+| Amazon CloudWatch | Monitoring - detailed metrics, dashboard, scaling alarms | 14 metrics, 1 dashboard, 2 standard alarms | 4.40 |
+| **Total** | | | **129.35** (USD 1,552.20 for 12 months) |
+
+This agrees with the quiet-month estimate above (USD 128.96) once three differences are counted:
+- **+1.59:** the calculator estimate also includes the sales-day servers.
+- **+1.80:** it charges the 20 GB of data out without the 100 GB free allowance.
+- **−3.00:** it treats the dashboard as free.
+
+The calculator has no field for T3 surplus CPU credits, which add up to USD 7.68 in a busy month.
+
 ### Export and share the estimate
 
 - **Name it:** choose **Edit** next to *My Estimate* and name it `onward-dev-orders (eu-west-1)`.
