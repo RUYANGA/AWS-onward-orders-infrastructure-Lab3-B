@@ -16,11 +16,12 @@ if [[ -n "$CONNECTION_ARN" ]]; then
   ready=true
 fi
 
+# GitHub owner names are case-insensitive, but the repository link only accepts lowercase.
 say "Deploying onward-$ENVIRONMENT-bootstrap ($phase)"
 aws cloudformation deploy --stack-name "onward-$ENVIRONMENT-bootstrap" \
   --template-file "$ROOT/bootstrap/bootstrap.yaml" --capabilities CAPABILITY_NAMED_IAM \
   --no-fail-on-empty-changeset --tags Project=onward "Owner=$OWNER" "Environment=$ENVIRONMENT" \
-  --parameter-overrides "Environment=$ENVIRONMENT" "Owner=$OWNER" "GitHubOwner=$GITHUB_OWNER" \
+  --parameter-overrides "Environment=$ENVIRONMENT" "Owner=$OWNER" "GitHubOwner=${GITHUB_OWNER,,}" \
     "RepoName=$REPO_NAME" "ConnectionReady=$ready" "ExistingConnectionArn=$CONNECTION_ARN"
 
 if [[ $phase == connection && -z "$CONNECTION_ARN" ]]; then
